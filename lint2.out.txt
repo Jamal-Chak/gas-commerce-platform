@@ -1,0 +1,77 @@
+
+> ember-gas@0.1.0 lint
+> eslint
+
+
+C:\Users\jonht\ember-gas\app\checkout\page.tsx
+  85:26  warning  Compilation Skipped: Use of incompatible library
+
+This API returns functions which cannot be memoized without leading to stale UI. To prevent this, by default React Compiler will skip memoizing this component/hook. However, you may see issues if values from this API are passed to other components/hooks that are memoized.
+
+C:\Users\jonht\ember-gas\app\checkout\page.tsx:85:26
+  83 |   }, [])
+  84 |
+> 85 |   const selectedZoneId = watch("delivery.zoneId")
+     |                          ^^^^^ React Hook Form's `useForm()` API returns a `watch()` function which cannot be memoized safely.
+  86 |   const selectedZone = useMemo(
+  87 |     () => zones.find((zone) => zone.id === selectedZoneId) ?? null,
+  88 |     [zones, selectedZoneId]  react-hooks/incompatible-library
+
+C:\Users\jonht\ember-gas\app\order\[id]\page.tsx
+  26:5  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Users\jonht\ember-gas\app\order\[id]\page.tsx:26:5
+  24 |
+  25 |   useEffect(() => {
+> 26 |     setOrder(getDemoOrder(id))
+     |     ^^^^^^^^ Avoid calling setState() directly within an effect
+  27 |     setLoading(false)
+  28 |   }, [id])
+  29 |  react-hooks/set-state-in-effect
+
+C:\Users\jonht\ember-gas\components\contact\contact-form.tsx
+  43:5  error  Error: This value cannot be modified
+
+Modifying a variable defined outside a component or hook is not allowed. Consider using an effect.
+
+C:\Users\jonht\ember-gas\components\contact\contact-form.tsx:43:5
+  41 |     const subject = encodeURIComponent(values.subject)
+  42 |     const body = encodeURIComponent(`${values.message}\n\n— ${values.name} (${values.email})`)
+> 43 |     window.location.href = `mailto:${email}?subject=${subject}&body=${body}`
+     |     ^^^^^^^^^^^^^^^ value cannot be modified
+  44 |     setSent(true)
+  45 |   })
+  46 |  react-hooks/immutability
+
+C:\Users\jonht\ember-gas\components\providers\cart-provider.tsx
+  62:36  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Users\jonht\ember-gas\components\providers\cart-provider.tsx:62:36
+  60 |       if (raw) {
+  61 |         const parsed = JSON.parse(raw) as CartLine[];
+> 62 |         if (Array.isArray(parsed)) setLines(parsed);
+     |                                    ^^^^^^^^ Avoid calling setState() directly within an effect
+  63 |       }
+  64 |     } catch {
+  65 |       // localStorage unavailable — start with an empty cart  react-hooks/set-state-in-effect
+
+C:\Users\jonht\ember-gas\lib\auth\auth-service.ts
+  77:12  warning  'error' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\jonht\ember-gas\lib\utils\format.ts
+  1:10  warning  'CylinderSize' is defined but never used  @typescript-eslint/no-unused-vars
+
+✖ 6 problems (3 errors, 3 warnings)
+

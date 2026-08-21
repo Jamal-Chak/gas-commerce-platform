@@ -1,0 +1,4 @@
+app/contact/page.tsx(75,26): error TS2322: Type 'string | null | undefined' is not assignable to type 'string | null'.
+  Type 'undefined' is not assignable to type 'string | null'.
+components/ui/form-field.tsx(31,32): error TS18046: 'children.props' is of type 'unknown'.
+components/ui/form-field.tsx(41,40): error TS18046: 'children.props' is of type 'unknown'.

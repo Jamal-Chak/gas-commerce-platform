@@ -1,36 +1,57 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Ember Gas
 
-## Getting Started
+A gas-commerce platform for ordering **gas refills**, **cylinder exchanges** and **new cylinders** with delivery to your door.
 
-First, run the development server:
+Built with Next.js 16 (App Router), TypeScript, Tailwind CSS v4, shadcn/ui (Luma preset), Radix UI, Lucide icons, React Hook Form + Zod, and Supabase.
+
+> **Status:** Frontend implementation complete against a clearly-marked demo data layer. The Supabase schema (`supabase/migrations/0001_initial_schema.sql`) is written and security-audited but **not yet deployed**. Everything that depends on the database (catalog, auth, orders, payments, delivery zones, accounts) is connected through clean boundaries in `lib/data/`, `lib/orders/` and `lib/auth/` and will light up automatically once Supabase is configured.
+
+## Getting started
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Environment
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Copy `.env.example` to `.env` and fill in the values. Nothing is required for the demo UI — the app falls back to the temporary **Ember Gas** demo identity and demo catalog.
 
-## Learn More
+```bash
+cp .env.example .env
+```
 
-To learn more about Next.js, take a look at the following resources:
+## Routes
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+| Route | Description |
+| --- | --- |
+| `/` | Home — hero, services, how it works, featured products, delivery zones |
+| `/products` | Product catalogue (filter by service) |
+| `/products/[slug]` | Product detail + add to cart |
+| `/services` | Service explainers |
+| `/cart` | Cart with quantity controls |
+| `/checkout` | Checkout — contact, delivery, payment, summary (RHF + Zod) |
+| `/order/[id]` | Order confirmation + delivery status tracker |
+| `/login` `/signup` `/forgot-password` | Supabase Auth UI |
+| `/account` `/account/orders` `/account/addresses` | Protected customer area |
+| `/contact` | Contact cards + form |
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Branding
 
-## Deploy on Vercel
+Branding is centralized in `lib/config/business.ts` and consumed via the `BusinessConfig` provider. The temporary "Ember Gas" identity is used until the client provides the real company name, logo and colors — everything replaces through environment variables (`.env.example`) without touching components.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Quality checks
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```bash
+npm run lint
+npx tsc --noEmit
+npm run build
+```
+
+## Docs
+
+- `ARCHITECTURE.md` — architecture and database design
+- `FRONTEND_IMPLEMENTATION_REPORT.md` — frontend implementation details
+- `supabase/migrations/0001_initial_schema.sql` — PostgreSQL schema (not yet deployed)
