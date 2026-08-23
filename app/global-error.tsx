@@ -1,44 +1,43 @@
-"use client"
+'use client';
 
-import { useEffect } from "react"
-import { RefreshCw } from "lucide-react"
-import { Button } from "@/components/ui/button"
+import { AlertTriangle } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 /**
- * Root error boundary. Never reveal stack traces, SQL errors or internal
- * details to the user — keep the message friendly and generic.
+ * Global error boundary for errors in the root layout itself.
+ * Must be a client component.
  */
-export default function GlobalError({
+export default function GlobalErrorBoundary({
   error,
   reset,
 }: {
-  error: Error & { digest?: string }
-  reset: () => void
+  error: Error & { digest?: string };
+  reset: () => void;
 }) {
-  useEffect(() => {
-    // Report to the logging/monitoring service in production.
-    console.error(error)
-  }, [error])
-
   return (
     <html lang="en">
-      <body>
-        <div className="mx-auto flex w-full max-w-2xl flex-col items-center gap-4 px-4 py-24 text-center">
-          <span className="bg-destructive/10 text-destructive grid size-16 place-items-center rounded-full">
-            <RefreshCw className="size-8" aria-hidden="true" />
-          </span>
-          <h1 className="text-3xl font-semibold tracking-tight">
-            Something went wrong
-          </h1>
-          <p className="text-muted-foreground max-w-md text-sm">
-            We hit an unexpected problem. Please try again — if it keeps happening,
-            that reference code is {error.digest ?? "unknown"}.
-          </p>
-          <Button size="lg" onClick={reset} className="mt-2">
-            Try again
-          </Button>
+      <body className="flex min-h-screen items-center justify-center bg-background px-4">
+        <div className="flex flex-col items-center gap-4 text-center">
+          <div className="bg-destructive/10 grid size-20 place-items-center rounded-full">
+            <AlertTriangle className="text-destructive size-10" />
+          </div>
+          <div>
+            <h1 className="text-2xl font-bold">Critical Error</h1>
+            <p className="text-muted-foreground mt-2 max-w-md text-sm">
+              The application encountered a critical error and could not load.
+              Please refresh the page or try again later.
+            </p>
+          </div>
+          <div className="flex gap-3">
+            <Button onClick={reset} variant="default">
+              Try again
+            </Button>
+            <Button onClick={() => (window.location.href = '/')} variant="outline">
+              Go to homepage
+            </Button>
+          </div>
         </div>
       </body>
     </html>
-  )
+  );
 }

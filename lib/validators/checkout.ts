@@ -19,7 +19,7 @@ export const deliverySchema = z.object({
 });
 
 export const paymentSchema = z.object({
-  method: z.enum(['pay_on_delivery', 'pay_online'], {
+  method: z.enum(['pay_on_delivery', 'pay_online', 'cash_on_delivery', 'payfast', 'ozow', 'yoco', 'snapscan', 'zapper'], {
     message: 'Please choose a payment method.',
   }),
 });

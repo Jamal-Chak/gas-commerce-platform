@@ -8,18 +8,15 @@ import { createBrowserSupabaseClient } from '../supabase/browserClient';
  * loading/error/success states. Uses the public (anon) client only — no
  * service-role credentials ever touch the browser.
  *
- * CURRENT STATE: works automatically as soon as `NEXT_PUBLIC_SUPABASE_URL`
- * and `NEXT_PUBLIC_SUPABASE_ANON_KEY` are configured. Until then the
- * functions return `AUTH_NOT_CONFIGURED` and the UI shows a friendly notice.
+ * When Supabase is not configured (env vars not set), the functions return
+ * `AUTH_NOT_CONFIGURED` and the UI shows a friendly notice.
  *
- * NOTE: for hardened production, session verification on protected routes
- * must also happen server-side (e.g. `@supabase/ssr` + middleware/proxy).
+ * Server-side session verification is handled by the proxy (proxy.ts) which
+ * refreshes the session cookie on every request using @supabase/ssr.
  */
 
 export function isSupabaseAuthConfigured(): boolean {
-  return Boolean(
-    process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-  );
+  return createBrowserSupabaseClient() !== null;
 }
 
 export type AuthResult =
@@ -55,9 +52,9 @@ function mapAuthError(error: { code?: string; message: string }): AuthResult {
 }
 
 export async function getAuthStatus(): Promise<AuthStatus> {
-  if (!isSupabaseAuthConfigured()) return { status: 'not-configured' };
+  const supabase = createBrowserSupabaseClient();
+  if (!supabase) return { status: 'not-configured' };
   try {
-    const supabase = createBrowserSupabaseClient();
     const {
       data: { session },
     } = await supabase.auth.getSession();
@@ -68,13 +65,13 @@ export async function getAuthStatus(): Promise<AuthStatus> {
 }
 
 export async function signInWithEmail(email: string, password: string): Promise<AuthResult> {
-  if (!isSupabaseAuthConfigured()) return NOT_CONFIGURED;
+  const supabase = createBrowserSupabaseClient();
+  if (!supabase) return NOT_CONFIGURED;
   try {
-    const supabase = createBrowserSupabaseClient();
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) return mapAuthError(error);
     return { ok: true, user: data.user, message: 'Welcome back!' };
-  } catch (error) {
+  } catch {
     return { ok: false, code: 'UNEXPECTED', message: 'Something went wrong. Please try again.' };
   }
 }
@@ -84,9 +81,9 @@ export async function signUpWithEmail(
   email: string,
   password: string
 ): Promise<AuthResult> {
-  if (!isSupabaseAuthConfigured()) return NOT_CONFIGURED;
+  const supabase = createBrowserSupabaseClient();
+  if (!supabase) return NOT_CONFIGURED;
   try {
-    const supabase = createBrowserSupabaseClient();
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
@@ -109,9 +106,9 @@ export async function signUpWithEmail(
 }
 
 export async function sendPasswordReset(email: string): Promise<AuthResult> {
-  if (!isSupabaseAuthConfigured()) return NOT_CONFIGURED;
+  const supabase = createBrowserSupabaseClient();
+  if (!supabase) return NOT_CONFIGURED;
   try {
-    const supabase = createBrowserSupabaseClient();
     const { error } = await supabase.auth.resetPasswordForEmail(email);
     if (error) return mapAuthError(error);
     return {
@@ -125,9 +122,9 @@ export async function sendPasswordReset(email: string): Promise<AuthResult> {
 }
 
 export async function signOutUser(): Promise<void> {
-  if (!isSupabaseAuthConfigured()) return;
+  const supabase = createBrowserSupabaseClient();
+  if (!supabase) return;
   try {
-    const supabase = createBrowserSupabaseClient();
     await supabase.auth.signOut();
   } catch {
     // Best-effort sign out.

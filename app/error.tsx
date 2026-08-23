@@ -1,37 +1,36 @@
-"use client"
+'use client';
 
-import { useEffect } from "react"
-import { RefreshCw } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Alert } from "@/components/ui/alert"
+import { AlertTriangle, RefreshCw } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 /**
- * Root app error boundary (keeps the header/footer layout intact).
- * Never reveal stack traces or internal errors to the user.
+ * Global error boundary for the app.
+ * Catches rendering errors and shows a friendly fallback.
  */
-export default function RootErrorBoundary({
+export default function GlobalError({
   error,
   reset,
 }: {
-  error: Error & { digest?: string }
-  reset: () => void
+  error: Error & { digest?: string };
+  reset: () => void;
 }) {
-  useEffect(() => {
-    console.error(error)
-  }, [error])
-
   return (
-    <div className="mx-auto flex w-full max-w-2xl flex-col items-center gap-4 px-4 py-24 text-center">
-      <Alert variant="destructive" title="Something went wrong" className="w-full text-left">
-        <p>
-          We hit an unexpected problem while loading this page. Please try again.{" "}
-          {error.digest ? `(Reference: ${error.digest})` : null}
-        </p>
-      </Alert>
-      <Button size="lg" onClick={reset} className="gap-2">
-        <RefreshCw className="size-4" aria-hidden="true" />
-        Try again
-      </Button>
+    <div className="flex min-h-[50vh] items-center justify-center px-4">
+      <div className="flex flex-col items-center gap-4 text-center">
+        <div className="bg-destructive/10 grid size-16 place-items-center rounded-full">
+          <AlertTriangle className="text-destructive size-8" />
+        </div>
+        <div>
+          <h2 className="text-xl font-semibold">Something went wrong</h2>
+          <p className="text-muted-foreground mt-1 max-w-sm text-sm">
+            We hit an unexpected error. Please try again — if the problem persists, contact support.
+          </p>
+        </div>
+        <Button onClick={reset} className="gap-2">
+          <RefreshCw className="size-4" />
+          Try again
+        </Button>
+      </div>
     </div>
-  )
+  );
 }

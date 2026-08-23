@@ -1,24 +1,53 @@
+'use server';
+
 import { DeliveryZone } from '../domain/types';
+import { createPublicServerClient } from '../supabase/serverClient';
 import { demoDeliveryZones } from './demo/demo-delivery-zones';
 
 /**
  * DELIVERY DATA ACCESS
  * --------------------
- * Delivery zones and fees must come from the database in production.
- *
- * CURRENT STATE: backed by demo zones (mirrors `supabase/seed.sql`).
- *
- * PRODUCTION INTEGRATION (once the database is deployed):
- *
- *   const supabase = createServerSupabaseClient();
- *   const { data } = await supabase
- *     .from('delivery_zones')
- *     .select('*')
- *     .eq('active', true);
- *   // map snake_case rows to the domain DeliveryZone type.
+ * When Supabase is configured, delivery zones come from the `delivery_zones`
+ * table. Falls back to demo data when the database is not connected.
  */
 
+function mapZoneRow(row: Record<string, unknown>): DeliveryZone {
+  return {
+    id: String(row.id),
+    name: String(row.name),
+    description: row.description ? String(row.description) : undefined,
+    deliveryFee: Number(row.delivery_fee),
+    estimatedMinutes: Number(row.estimated_minutes),
+    active: Boolean(row.active),
+  };
+}
+
+async function fetchZonesFromSupabase(): Promise<DeliveryZone[] | null> {
+  try {
+    const supabase = createPublicServerClient();
+    if (!supabase) return null;
+
+    const { data, error } = await supabase
+      .from('delivery_zones')
+      .select('*')
+      .eq('active', true)
+      .order('delivery_fee');
+
+    if (error) {
+      console.error('[delivery] Supabase error:', error.message);
+      return null;
+    }
+
+    return (data ?? []).map((row: Record<string, unknown>) => mapZoneRow(row));
+  } catch (err) {
+    console.error('[delivery] Failed to fetch from Supabase:', err);
+    return null;
+  }
+}
+
 export async function getDeliveryZones(): Promise<DeliveryZone[]> {
+  const dbZones = await fetchZonesFromSupabase();
+  if (dbZones && dbZones.length > 0) return dbZones;
   return demoDeliveryZones.filter((zone) => zone.active !== false);
 }
 

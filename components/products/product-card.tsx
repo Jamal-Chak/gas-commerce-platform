@@ -3,6 +3,7 @@ import Image from "next/image"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { AddToCartForm } from "@/components/cart/add-to-cart-button"
+import { WishlistButton } from "@/components/products/wishlist-button"
 import { formatCurrency, formatCylinderSize, formatServiceLabel } from "@/lib/utils/format"
 import { Product } from "@/lib/domain/types"
 
@@ -41,6 +42,9 @@ export function ProductCard({ product, currency }: ProductCardProps) {
             Sale
           </Badge>
         ) : null}
+        <div className="absolute top-2 right-2">
+          <WishlistButton product={product} />
+        </div>
       </Link>
 
       <div className="flex flex-1 flex-col gap-3 p-4">

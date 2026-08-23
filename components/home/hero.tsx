@@ -1,13 +1,13 @@
+'use client';
+
 import Link from "next/link"
 import Image from "next/image"
 import { ArrowRight, Flame } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { getBusinessConfig } from "@/lib/config/business"
-
-const highlights = ["Gas refills", "Cylinder exchanges", "New cylinders", "Reliable delivery"]
+import { useTranslation } from "@/lib/i18n"
 
 export function Hero() {
-  const { companyName, tagline } = getBusinessConfig()
+  const { t } = useTranslation()
 
   return (
     <section className="relative overflow-hidden">
@@ -19,32 +19,24 @@ export function Hero() {
         <div>
           <span className="border-border text-muted-foreground inline-flex items-center gap-1.5 rounded-full border bg-background px-3 py-1 text-xs font-medium">
             <Flame className="text-primary size-3.5" aria-hidden="true" />
-            {companyName} — gas delivered to your door
+            {t.hero.title}
           </span>
           <h1 className="mt-5 text-4xl font-semibold tracking-tight sm:text-5xl lg:text-6xl">
-            Gas refills, delivered{" "}
-            <span className="text-primary">fast</span>.
+            {t.hero.title.split(' ').slice(0, 2).join(' ')}{' '}
+            <span className="text-primary">{t.hero.cta}</span>.
           </h1>
-          <p className="text-muted-foreground mt-4 max-w-lg text-lg">{tagline}</p>
+          <p className="text-muted-foreground mt-4 max-w-lg text-lg">{t.hero.subtitle}</p>
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">
             <Button asChild size="lg" className="gap-2">
               <Link href="/products">
-                Order Gas
+                {t.hero.cta}
                 <ArrowRight aria-hidden="true" />
               </Link>
             </Button>
             <Button asChild size="lg" variant="outline">
-              <Link href="/services">Explore Services</Link>
+              <Link href="/services">{t.hero.secondaryCta}</Link>
             </Button>
           </div>
-          <ul className="text-muted-foreground mt-8 flex flex-wrap gap-x-6 gap-y-2 text-sm">
-            {highlights.map((item) => (
-              <li key={item} className="flex items-center gap-1.5">
-                <span className="bg-primary size-1.5 rounded-full" aria-hidden="true" />
-                {item}
-              </li>
-            ))}
-          </ul>
         </div>
 
         <div className="relative">

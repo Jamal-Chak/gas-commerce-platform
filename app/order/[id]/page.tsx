@@ -1,47 +1,63 @@
-'use client'
+'use client';
 
-import { useEffect, useState } from "react"
-import Link from "next/link"
-import { useParams } from "next/navigation"
-import { CheckCircle2, MapPin, PackageSearch, Phone, User } from "lucide-react"
-import { Alert } from "@/components/ui/alert"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Skeleton } from "@/components/ui/skeleton"
-import { Separator } from "@/components/ui/separator"
-import { OrderStatusTracker } from "@/components/orders/order-status-tracker"
-import { OrderSummaryCard } from "@/components/orders/order-summary-card"
-import { getDemoOrder, PlacedOrder } from "@/lib/orders/demo-order-store"
-import { useBusinessConfig } from "@/components/providers/business-config-provider"
-import { formatMinutes } from "@/lib/utils/format"
+import { useEffect, useState } from 'react';
+import { useParams } from 'next/navigation';
+import Link from 'next/link';
+import {
+  CheckCircle2, Loader2, MapPin, PackageSearch, Phone, User,
+  Wifi, WifiOff, RefreshCw, Truck, Navigation, Clock,
+} from 'lucide-react';
+import { Alert } from '@/components/ui/alert';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Separator } from '@/components/ui/separator';
+import { OrderStatusTracker } from '@/components/orders/order-status-tracker';
+import { OrderSummaryCard } from '@/components/orders/order-summary-card';
+import { lookupOrderAction } from '@/lib/orders/actions';
+import type { PlacedOrder } from '@/lib/orders/order-service';
+import { useBusinessConfig } from '@/components/providers/business-config-provider';
+import { formatMinutes } from '@/lib/utils/format';
+import { useOrderTracking } from '@/lib/orders/realtime-tracking';
+import type { OrderStatus, OrderStatusEvent } from '@/lib/domain/types';
 
 export default function OrderConfirmationPage() {
-  const { id } = useParams<{ id: string }>()
-  const { currency } = useBusinessConfig()
-  const [order, setOrder] = useState<PlacedOrder | null>(null)
-  const [loading, setLoading] = useState(true)
+  const { id } = useParams<{ id: string }>();
+  const { currency } = useBusinessConfig();
+  const [order, setOrder] = useState<PlacedOrder | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  // Real-time tracking
+  const { status: liveStatus, events, driverLocation, connected, refresh } = useOrderTracking(
+    order && !order.demo ? order.id : null
+  );
 
   useEffect(() => {
-    setOrder(getDemoOrder(id))
-    setLoading(false)
-  }, [id])
+    let cancelled = false;
+    (async () => {
+      const result = await lookupOrderAction(id);
+      if (!cancelled) {
+        setOrder(result);
+        setLoading(false);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [id]);
+
+  // Sync live status into order state
+  useEffect(() => {
+    if (liveStatus && order) {
+      setOrder((prev) => prev ? { ...prev, status: liveStatus } : prev);
+    }
+  }, [liveStatus, order]);
 
   if (loading) {
     return (
-      <div
-        className="mx-auto grid w-full max-w-4xl gap-6 px-4 py-12 sm:px-6 lg:px-8"
-        aria-hidden="true"
-      >
-        <div className="flex flex-col items-center gap-2 py-6">
-          <Skeleton className="size-14 rounded-full" />
-          <Skeleton className="h-7 w-56" />
-          <Skeleton className="h-4 w-72" />
-        </div>
-        <Skeleton className="h-48 w-full" />
-        <Skeleton className="h-48 w-full" />
+      <div className="mx-auto flex w-full max-w-2xl flex-col items-center gap-4 px-4 py-24 text-center sm:px-6 lg:px-8">
+        <Loader2 className="text-primary size-8 animate-spin" aria-hidden="true" />
+        <p className="text-muted-foreground text-sm">Loading your order…</p>
       </div>
-    )
+    );
   }
 
   if (!order) {
@@ -53,26 +69,46 @@ export default function OrderConfirmationPage() {
         <h1 className="text-2xl font-semibold tracking-tight">Order not found</h1>
         <p className="text-muted-foreground max-w-md text-sm">
           We couldn&apos;t find an order with that reference. It may not exist, or this order was
-          placed in a previous session. Your session may have expired.
+          placed in a previous session.
         </p>
         <Button asChild size="lg" className="mt-2">
           <Link href="/products">Continue shopping</Link>
         </Button>
       </div>
-    )
+    );
   }
+
+  const isDelivered = order.status === 'delivered' as OrderStatus;
 
   return (
     <div className="mx-auto w-full max-w-4xl px-4 py-10 sm:px-6 sm:py-14 lg:px-8">
       <div className="flex flex-col items-center gap-3 text-center">
-        <span className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 grid size-16 place-items-center rounded-full">
-          <CheckCircle2 className="size-8" aria-hidden="true" />
+        <span className={isDelivered
+          ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 grid size-16 place-items-center rounded-full'
+          : 'bg-primary/10 text-primary grid size-16 place-items-center rounded-full'
+        }>
+          {isDelivered
+            ? <CheckCircle2 className="size-8" aria-hidden="true" />
+            : <Truck className="size-8" aria-hidden="true" />
+          }
         </span>
-        <h1 className="text-3xl font-semibold tracking-tight">Order confirmed</h1>
+        <h1 className="text-3xl font-semibold tracking-tight">
+          {isDelivered ? 'Order delivered' : 'Order confirmed'}
+        </h1>
         <p className="text-muted-foreground text-sm">
-          Order number:{" "}
+          Order number:{' '}
           <span className="text-foreground font-semibold tabular-nums">{order.orderNumber}</span>
         </p>
+        {/* Real-time connection indicator */}
+        {!order.demo && (
+          <div className="flex items-center gap-2 text-xs">
+            {connected ? (
+              <><Wifi className="size-3.5 text-emerald-500" /> <span className="text-emerald-600">Live tracking active</span></>
+            ) : (
+              <><WifiOff className="size-3.5 text-muted-foreground" /> <span className="text-muted-foreground">Connecting…</span></>
+            )}
+          </div>
+        )}
       </div>
 
       {order.demo ? (
@@ -82,15 +118,76 @@ export default function OrderConfirmationPage() {
       ) : null}
 
       <div className="mt-8 grid items-start gap-6 lg:grid-cols-[1fr_1.2fr]">
-        <Card className="gap-4">
-          <CardHeader>
-            <CardTitle className="text-lg">Delivery status</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <OrderStatusTracker status={order.status} />
-          </CardContent>
-        </Card>
+        {/* Left column: Status tracker + Driver location */}
+        <div className="flex flex-col gap-6">
+          <Card className="gap-4">
+            <CardHeader className="flex flex-row items-center justify-between">
+              <CardTitle className="text-lg">Delivery status</CardTitle>
+              {!order.demo && (
+                <Button variant="ghost" size="sm" onClick={refresh} className="size-8 p-0">
+                  <RefreshCw className="size-4" />
+                </Button>
+              )}
+            </CardHeader>
+            <CardContent>
+              <OrderStatusTracker status={order.status} />
+            </CardContent>
+          </Card>
 
+          {/* Driver Location Card */}
+          {!order.demo && driverLocation && !isDelivered && (
+            <Card className="gap-4 border-primary/20 bg-primary/5">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-lg">
+                  <Navigation className="text-primary size-5" aria-hidden="true" />
+                  Driver en route
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="flex flex-col gap-3">
+                <div className="flex items-center gap-3 text-sm">
+                  <div className="bg-primary/10 grid size-10 place-items-center rounded-full">
+                    <Truck className="text-primary size-5" />
+                  </div>
+                  <div>
+                    {driverLocation.driverName && (
+                      <p className="font-medium">{driverLocation.driverName}</p>
+                    )}
+                    {driverLocation.driverPhone && (
+                      <p className="text-muted-foreground text-xs">{driverLocation.driverPhone}</p>
+                    )}
+                  </div>
+                </div>
+                <Separator />
+                <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                  <MapPin className="size-3.5" />
+                  <span>
+                    Location: {driverLocation.latitude.toFixed(4)}, {driverLocation.longitude.toFixed(4)}
+                  </span>
+                </div>
+                {driverLocation.updatedAt && (
+                  <p className="text-muted-foreground flex items-center gap-1 text-xs">
+                    <Clock className="size-3" />
+                    Updated {new Date(driverLocation.updatedAt).toLocaleTimeString()}
+                  </p>
+                )}
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Status Timeline */}
+          {!order.demo && events.length > 0 && (
+            <Card className="gap-4">
+              <CardHeader>
+                <CardTitle className="text-lg">Activity timeline</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <StatusTimeline events={events} />
+              </CardContent>
+            </Card>
+          )}
+        </div>
+
+        {/* Right column: Contact, Summary */}
         <div className="flex flex-col gap-6">
           <Card className="gap-4">
             <CardHeader>
@@ -144,7 +241,7 @@ export default function OrderConfirmationPage() {
               <CardTitle className="text-lg">Order summary</CardTitle>
             </CardHeader>
             <CardContent>
-              <OrderSummaryCard order={order} currency={currency ?? "USD"} />
+              <OrderSummaryCard order={order} currency={currency ?? 'ZAR'} />
             </CardContent>
           </Card>
 
@@ -159,5 +256,37 @@ export default function OrderConfirmationPage() {
         </div>
       </div>
     </div>
-  )
+  );
+}
+
+function StatusTimeline({ events }: { events: OrderStatusEvent[] }) {
+  const labels: Record<string, string> = {
+    pending: 'Order received',
+    confirmed: 'Order confirmed',
+    preparing: 'Preparing your gas',
+    dispatched: 'Left our depot',
+    out_for_delivery: 'On the way to you',
+    delivered: 'Delivered successfully',
+    cancelled: 'Order cancelled',
+  };
+
+  return (
+    <ol className="relative border-l border-border ml-3">
+      {[...events].reverse().map((event, idx) => (
+        <li key={event.id} className="mb-4 ml-4">
+          <div className={`absolute -left-1.5 mt-1.5 size-3 rounded-full ${
+            idx === 0 ? 'bg-primary animate-pulse' : 'bg-muted-foreground/30'
+          }`} />
+          <p className="text-sm font-medium">{labels[event.status] ?? event.status}</p>
+          <p className="text-muted-foreground text-xs">
+            {new Date(event.createdAt).toLocaleString()}
+            {event.changedByName ? ` by ${event.changedByName}` : ''}
+          </p>
+          {event.note && (
+            <p className="text-muted-foreground mt-0.5 text-xs italic">{event.note}</p>
+          )}
+        </li>
+      ))}
+    </ol>
+  );
 }

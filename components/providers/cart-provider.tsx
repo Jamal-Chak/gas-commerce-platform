@@ -6,7 +6,6 @@ import {
   useContext,
   useEffect,
   useMemo,
-  useRef,
   useState,
 } from 'react';
 import type { ReactNode } from 'react';
@@ -48,27 +47,29 @@ function effectivePrice(line: Pick<CartLine, 'salePrice' | 'unitPrice'>): number
  *  - totals shown here are NEVER trusted at checkout — the order service
  *    must recalculate everything from the database.
  */
-export function CartProvider({ children }: { children: ReactNode }) {
-  const [lines, setLines] = useState<CartLine[]>([]);
-  const [isOpen, setIsOpen] = useState(false);
-  const hydrated = useRef(false);
+function getInitialLines(): CartLine[] {
+  if (typeof window === 'undefined') {
+    return [];
+  }
 
-  // Hydrate once on mount (after SSR) to avoid hydration mismatches.
-  useEffect(() => {
-    try {
-      const raw = window.localStorage.getItem(STORAGE_KEY);
-      if (raw) {
-        const parsed = JSON.parse(raw) as CartLine[];
-        if (Array.isArray(parsed)) setLines(parsed);
-      }
-    } catch {
-      // localStorage unavailable — start with an empty cart.
+  try {
+    const raw = window.localStorage.getItem(STORAGE_KEY);
+    if (!raw) {
+      return [];
     }
-    hydrated.current = true;
-  }, []);
+
+    const parsed = JSON.parse(raw) as unknown;
+    return Array.isArray(parsed) ? (parsed as CartLine[]) : [];
+  } catch {
+    return [];
+  }
+}
+
+export function CartProvider({ children }: { children: ReactNode }) {
+  const [lines, setLines] = useState<CartLine[]>(getInitialLines);
+  const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
-    if (!hydrated.current) return;
     try {
       window.localStorage.setItem(STORAGE_KEY, JSON.stringify(lines));
     } catch {

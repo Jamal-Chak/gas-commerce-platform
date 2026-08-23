@@ -5,11 +5,14 @@ import { Mail, MapPin, Phone, Send } from "lucide-react"
 import { Logo } from "@/components/layout/logo"
 import { Separator } from "@/components/ui/separator"
 import { useBusinessConfig } from "@/components/providers/business-config-provider"
+import { useTranslation } from "@/lib/i18n"
 
 const quickLinks = [
   { href: "/", label: "Home" },
   { href: "/products", label: "Gas Products" },
   { href: "/services", label: "Services" },
+  { href: "/bulk-order", label: "Bulk Orders" },
+  { href: "/safety", label: "Gas Safety" },
   { href: "/contact", label: "Contact" },
 ]
 
@@ -22,6 +25,7 @@ const serviceLinks = [
 
 export function SiteFooter() {
   const { companyName, tagline, phone, email, address, whatsapp } = useBusinessConfig()
+  const { t } = useTranslation()
   const year = new Date().getFullYear()
 
   return (
@@ -34,7 +38,7 @@ export function SiteFooter() {
           </div>
 
           <nav aria-label="Quick links">
-            <h2 className="text-sm font-semibold">Quick links</h2>
+            <h2 className="text-sm font-semibold">{t.footer.quickLinks}</h2>
             <ul className="mt-3 flex flex-col gap-2 text-sm">
               {quickLinks.map((link) => (
                 <li key={link.href}>
@@ -47,7 +51,7 @@ export function SiteFooter() {
           </nav>
 
           <nav aria-label="Services">
-            <h2 className="text-sm font-semibold">Services</h2>
+            <h2 className="text-sm font-semibold">{t.nav.services}</h2>
             <ul className="mt-3 flex flex-col gap-2 text-sm">
               {serviceLinks.map((link) => (
                 <li key={link.href}>
@@ -60,7 +64,7 @@ export function SiteFooter() {
           </nav>
 
           <div>
-            <h2 className="text-sm font-semibold">Contact</h2>
+            <h2 className="text-sm font-semibold">{t.footer.contactUs}</h2>
             <ul className="mt-3 flex flex-col gap-3 text-sm">
               {phone ? (
                 <li className="flex items-center gap-2">
@@ -109,7 +113,7 @@ export function SiteFooter() {
         <Separator className="mt-10" />
         <div className="mt-6 flex flex-col items-center justify-between gap-2 text-xs text-muted-foreground sm:flex-row">
           <p>
-            © {year} {companyName}. All rights reserved.
+            © {year} {companyName}. {t.footer.rights}
           </p>
           <p>Temporary demo identity — real company details pending.</p>
         </div>

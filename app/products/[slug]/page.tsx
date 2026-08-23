@@ -8,9 +8,11 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
 import { AddToCartForm } from "@/components/cart/add-to-cart-button"
+import { ProductReviews } from "@/components/products/product-reviews"
 import { getBusinessConfig } from "@/lib/config/business"
-import { getProductBySlug } from "@/lib/data/catalog"
+import { getProductBySlug, getProductReviews } from "@/lib/data/catalog"
 import { formatCurrency, formatCylinderSize, formatServiceLabel } from "@/lib/utils/format"
+import { SITE_URL } from "@/lib/config/business"
 
 interface ProductPageProps {
   params: Promise<{ slug: string }>
@@ -23,18 +25,26 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
     return { title: "Product not found" }
   }
   const { companyName } = getBusinessConfig()
+  const { averageRating, reviews } = await getProductReviews(product.id)
   return {
     title: product.name,
     description:
       product.description ??
       `${product.name} from ${companyName ?? "Ember Gas"} — delivered to your door.`,
+    openGraph: {
+      title: product.name,
+      description: product.description ?? `${product.name} — gas delivered to your door.`,
+      images: product.imageUrl ? [{ url: product.imageUrl }] : undefined,
+      type: "website",
+    },
   }
 }
 
 export default async function ProductPage({ params }: ProductPageProps) {
   const { slug } = await params
   const product = await getProductBySlug(slug)
-  const { currency } = getBusinessConfig()
+  const { currency, companyName } = getBusinessConfig()
+  const { reviews, averageRating } = await getProductReviews(product?.id ?? '')
 
   if (!product) {
     notFound()
@@ -45,8 +55,33 @@ export default async function ProductPage({ params }: ProductPageProps) {
     product.salePrice != null && product.price != null && product.salePrice < product.price
   const unavailable = product.active === false
 
+  // JSON-LD structured data for SEO
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Product',
+    name: product.name,
+    description: product.description ?? `${product.name} — gas delivered to your door.`,
+    image: product.imageUrl ? `${SITE_URL}${product.imageUrl}` : undefined,
+    brand: { '@type': 'Brand', name: companyName ?? 'Ember Gas' },
+    offers: {
+      '@type': 'Offer',
+      price: price ?? 0,
+      priceCurrency: currency ?? 'ZAR',
+      availability: unavailable ? 'https://schema.org/OutOfStock' : 'https://schema.org/InStock',
+    },
+    aggregateRating: reviews.length > 0 ? {
+      '@type': 'AggregateRating',
+      ratingValue: averageRating.toFixed(1),
+      reviewCount: reviews.length,
+    } : undefined,
+  }
+
   return (
     <div className="mx-auto w-full max-w-7xl px-4 py-10 sm:px-6 sm:py-14 lg:px-8">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <Link
         href="/products"
         className="text-muted-foreground inline-flex items-center gap-1.5 text-sm hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/30 focus-visible:rounded-sm focus-visible:outline-none"
@@ -141,6 +176,15 @@ export default async function ProductPage({ params }: ProductPageProps) {
               </ul>
             </CardContent>
           </Card>
+
+          {/* Reviews */}
+          <div className="mt-8">
+            <ProductReviews
+              productId={product.id}
+              reviews={reviews}
+              averageRating={averageRating}
+            />
+          </div>
         </div>
       </div>
     </div>

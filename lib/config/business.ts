@@ -7,6 +7,10 @@ import { BusinessConfig } from '../domain/types';
  * Every value here is overridable through environment variables (see
  * `.env.example`). Nothing is hard-coded into page components — always go
  * through `getBusinessConfig()` so branding stays centralized.
+ *
+ * IMPORTANT: process.env is accessed with literal property names (not
+ * dynamic bracket notation) so Next.js can inline NEXT_PUBLIC_* values
+ * into the client bundle at compile time.
  */
 export const demoBusinessConfig: BusinessConfig = {
   companyName: 'Ember Gas',
@@ -25,16 +29,16 @@ export const demoBusinessConfig: BusinessConfig = {
 // Loads business configuration from environment variables or returns nulls.
 export function loadBusinessConfigFromEnv(): BusinessConfig {
   return {
-    companyName: process.env.NEXT_PUBLIC_BIZ_NAME ?? null,
-    logoUrl: process.env.NEXT_PUBLIC_BIZ_LOGO ?? null,
-    tagline: process.env.NEXT_PUBLIC_BIZ_TAGLINE ?? null,
-    primaryColor: process.env.NEXT_PUBLIC_BIZ_PRIMARY_COLOR ?? null,
-    secondaryColor: process.env.NEXT_PUBLIC_BIZ_SECONDARY_COLOR ?? null,
-    phone: process.env.NEXT_PUBLIC_BIZ_PHONE ?? null,
-    email: process.env.NEXT_PUBLIC_BIZ_EMAIL ?? null,
-    address: process.env.NEXT_PUBLIC_BIZ_ADDRESS ?? null,
-    currency: process.env.NEXT_PUBLIC_BIZ_CURRENCY ?? null,
-    whatsapp: process.env.NEXT_PUBLIC_BIZ_WHATSAPP ?? null,
+    companyName: process.env.NEXT_PUBLIC_BIZ_NAME?.trim() || null,
+    logoUrl: process.env.NEXT_PUBLIC_BIZ_LOGO?.trim() || null,
+    tagline: process.env.NEXT_PUBLIC_BIZ_TAGLINE?.trim() || null,
+    primaryColor: process.env.NEXT_PUBLIC_BIZ_PRIMARY_COLOR?.trim() || null,
+    secondaryColor: process.env.NEXT_PUBLIC_BIZ_SECONDARY_COLOR?.trim() || null,
+    phone: process.env.NEXT_PUBLIC_BIZ_PHONE?.trim() || null,
+    email: process.env.NEXT_PUBLIC_BIZ_EMAIL?.trim() || null,
+    address: process.env.NEXT_PUBLIC_BIZ_ADDRESS?.trim() || null,
+    currency: process.env.NEXT_PUBLIC_BIZ_CURRENCY?.trim() || null,
+    whatsapp: process.env.NEXT_PUBLIC_BIZ_WHATSAPP?.trim() || null,
     socialLinks: null,
   };
 }
@@ -57,5 +61,4 @@ export function getBusinessConfig(): BusinessConfig {
   return merged;
 }
 
-export const SITE_URL =
-  process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000';
+export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL?.trim() || 'http://localhost:3000';

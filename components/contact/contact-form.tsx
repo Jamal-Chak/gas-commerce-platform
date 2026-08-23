@@ -40,7 +40,9 @@ export function ContactForm({ email }: { email: string | null | undefined }) {
     if (!email) return
     const subject = encodeURIComponent(values.subject)
     const body = encodeURIComponent(`${values.message}\n\n— ${values.name} (${values.email})`)
-    window.location.href = `mailto:${email}?subject=${subject}&body=${body}`
+    const mailtoLink = document.createElement('a')
+    mailtoLink.href = `mailto:${email}?subject=${subject}&body=${body}`
+    mailtoLink.click()
     setSent(true)
   })
 

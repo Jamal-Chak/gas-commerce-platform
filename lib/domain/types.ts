@@ -128,4 +128,175 @@ export interface CustomerProfile {
   email?: string | null;
 }
 
-export type PaymentMethod = "pay_on_delivery" | "pay_online";
+export type PaymentMethod = "pay_on_delivery" | "pay_online" | "payfast" | "ozow" | "yoco" | "snapscan" | "zapper" | "cash_on_delivery";
+
+// ── Real-Time Tracking ──────────────────────────────────────
+
+export interface OrderStatusEvent {
+  id: string;
+  orderId: string;
+  status: OrderStatus;
+  previousStatus?: OrderStatus | null;
+  changedByName?: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
+  note?: string | null;
+  createdAt: string;
+}
+
+export interface DriverLocation {
+  latitude: number;
+  longitude: number;
+  driverName?: string | null;
+  driverPhone?: string | null;
+  updatedAt?: string | null;
+}
+
+export interface OrderNotification {
+  id: string;
+  orderId: string;
+  channel: 'email' | 'sms' | 'whatsapp' | 'push' | 'in_app';
+  type: string;
+  title: string;
+  body?: string | null;
+  data?: Record<string, unknown>;
+  sentAt?: string | null;
+  readAt?: string | null;
+  createdAt: string;
+}
+
+// ── Subscriptions ───────────────────────────────────────────
+
+export interface Subscription {
+  id: string;
+  customerId: string;
+  productId: string;
+  productName?: string | null;
+  addressId?: string | null;
+  intervalDays: number;
+  nextDeliveryDate: string;
+  status: 'active' | 'paused' | 'cancelled' | 'expired';
+  lastOrderId?: string | null;
+  createdAt: string;
+}
+
+// ── Payments ────────────────────────────────────────────────
+
+export type PaymentProviderType = 'payfast' | 'ozow' | 'yoco' | 'snapscan' | 'zapper' | 'cash_on_delivery' | 'manual';
+
+export interface PaymentProviderConfig {
+  provider: PaymentProviderType;
+  enabled: boolean;
+  displayName: string;
+  icon?: string | null;
+  description?: string | null;
+}
+
+// ── Admin ───────────────────────────────────────────────────
+
+export type UserRole = 'customer' | 'driver' | 'admin' | 'super_admin';
+
+export interface Driver {
+  id: string;
+  fullName: string;
+  phone: string;
+  vehicleType?: string | null;
+  vehicleRegistration?: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
+  isOnline: boolean;
+  isActive: boolean;
+}
+
+// ── Cylinder Deposits ───────────────────────────────────────
+
+export interface CylinderDeposit {
+  id: string;
+  customerId: string;
+  cylinderSizeKg: number;
+  quantity: number;
+  depositAmount: number;
+  depositPaidAt: string;
+  returnedAt?: string | null;
+  refundAmount?: number | null;
+  orderId?: string | null;
+  notes?: string | null;
+}
+
+// ── Load Shedding ───────────────────────────────────────────
+
+export interface LoadSheddingStage {
+  areaCode: string;
+  areaName: string;
+  stage: number;
+  currentlyInLoadShedding: boolean;
+  nextStageChange?: string | null;
+  scheduleData?: Record<string, unknown>;
+}
+
+// ── Loyalty ─────────────────────────────────────────────────
+
+export interface LoyaltyBalance {
+  points: number;
+  lifetimePoints: number;
+  pointsPerRandSpent: number;
+  referralBonusPoints: number;
+  minRedemptionPoints: number;
+}
+
+export interface LoyaltyTransaction {
+  id: string;
+  points: number;
+  type: 'earned' | 'redeemed' | 'bonus' | 'expired' | 'referral';
+  description?: string | null;
+  orderId?: string | null;
+  createdAt: string;
+}
+
+// ── Reviews ─────────────────────────────────────────────────
+
+export interface ProductReview {
+  id: string;
+  productId: string;
+  customerId: string;
+  customerName: string;
+  rating: number;
+  title?: string | null;
+  body?: string | null;
+  isVerifiedPurchase: boolean;
+  adminReply?: string | null;
+  createdAt: string;
+}
+
+// ── Promo Codes ─────────────────────────────────────────────
+
+export interface PromoCode {
+  id: string;
+  code: string;
+  description?: string | null;
+  type: 'percentage' | 'fixed' | 'free_delivery';
+  scope: 'cart' | 'product' | 'category' | 'delivery';
+  value: number;
+  minOrderAmount: number;
+  maxDiscount?: number | null;
+  usageLimit?: number | null;
+  usageCount: number;
+  expiresAt?: string | null;
+  active: boolean;
+}
+
+export interface PromoValidation {
+  valid: boolean;
+  promo?: PromoCode | null;
+  discount?: number | null;
+  message?: string | null;
+}
+
+// ── Referrals ───────────────────────────────────────────────
+
+export interface ReferralInfo {
+  code: string;
+  totalReferrals: number;
+  completedReferrals: number;
+  totalPointsEarned: number;
+}

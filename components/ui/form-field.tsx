@@ -29,17 +29,23 @@ function FormField({
   className,
 }: FormFieldProps) {
   const childProps = (children as React.ReactElement<{ [key: string]: unknown }>).props
-  const controlId = htmlFor ?? childProps.id
+  const controlId = htmlFor ?? (typeof childProps.id === "string" ? childProps.id : undefined)
   const errorId = controlId ? `${controlId}-error` : undefined
   const hintId = controlId ? `${controlId}-hint` : undefined
   const describedBy = [error ? errorId : null, hint && !error ? hintId : null]
     .filter(Boolean)
     .join(" ") || undefined
 
+  const ariaInvalid = error
+    ? true
+    : typeof childProps["aria-invalid"] === "boolean"
+      ? childProps["aria-invalid"]
+      : undefined
+
   const control = React.isValidElement(children)
     ? React.cloneElement(children as React.ReactElement<{ [key: string]: unknown }>, {
         id: controlId,
-        "aria-invalid": error ? true : childProps["aria-invalid"],
+        "aria-invalid": ariaInvalid,
         "aria-describedby": describedBy,
       })
     : children

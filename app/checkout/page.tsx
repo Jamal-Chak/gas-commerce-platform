@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
-import { Controller, useForm } from "react-hook-form"
+import { Controller, useForm, useWatch } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import {
   ArrowLeft,
@@ -14,6 +14,9 @@ import {
   Truck,
   User,
   Wallet,
+  Banknote,
+  Tag,
+  Zap,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -32,6 +35,7 @@ import { getDeliveryZones } from "@/lib/data/delivery"
 import { placeOrder } from "@/lib/orders/order-service"
 import { formatCurrency, formatMinutes } from "@/lib/utils/format"
 import { DeliveryZone } from "@/lib/domain/types"
+import { validatePromoCode } from "@/lib/orders/payment-service"
 
 export default function CheckoutPage() {
   const { lines, subtotal, clearCart } = useCart()
@@ -42,12 +46,16 @@ export default function CheckoutPage() {
   const [zonesError, setZonesError] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [formError, setFormError] = useState<string | null>(null)
+  const [promoCode, setPromoCode] = useState('')
+  const [promoDiscount, setPromoDiscount] = useState(0)
+  const [promoMessage, setPromoMessage] = useState<string | null>(null)
+  const [promoError, setPromoError] = useState<string | null>(null)
+  const [applyingPromo, setApplyingPromo] = useState(false)
 
   const {
     register,
     control,
     handleSubmit,
-    watch,
     formState: { errors },
   } = useForm<CheckoutValues>({
     resolver: zodResolver(checkoutSchema),
@@ -61,7 +69,7 @@ export default function CheckoutPage() {
         area: "",
         deliveryInstructions: "",
       },
-      payment: { method: "pay_on_delivery" },
+      payment: { method: "cash_on_delivery" },
     },
   })
 
@@ -82,13 +90,17 @@ export default function CheckoutPage() {
     }
   }, [])
 
-  const selectedZoneId = watch("delivery.zoneId")
+  const selectedZoneId = useWatch({
+    control,
+    name: "delivery.zoneId",
+  })
   const selectedZone = useMemo(
     () => zones.find((zone) => zone.id === selectedZoneId) ?? null,
     [zones, selectedZoneId]
   )
   const deliveryFee = selectedZone?.deliveryFee ?? 0
-  const total = subtotal + deliveryFee
+  const discount = promoDiscount
+  const total = subtotal + deliveryFee - discount
 
   if (lines.length === 0) {
     return (
@@ -110,7 +122,7 @@ export default function CheckoutPage() {
   const onSubmit = handleSubmit(async (values: CheckoutValues) => {
     setFormError(null)
     if (values.payment.method === "pay_online") {
-      setFormError("Online payments are being connected. Please choose Pay on delivery for now.")
+      setFormError("Please select a specific payment method below.")
       return
     }
     if (!lines.length) {
@@ -123,7 +135,7 @@ export default function CheckoutPage() {
         lines,
         customer: values.contact,
         delivery: values.delivery,
-        paymentMethod: values.payment.method,
+        paymentMethod: values.payment.method as "cash_on_delivery" | "pay_on_delivery" | "pay_online",
         subtotal,
         deliveryFee,
         total,
@@ -133,7 +145,8 @@ export default function CheckoutPage() {
         return
       }
       clearCart()
-      router.push(`/order/${result.order.id}?demo=1`)
+      const demoParam = result.order.demo ? "?demo=1" : ""
+      router.push(`/order/${result.order.id}${demoParam}`)
     } catch {
       setFormError("Something went wrong while creating your order. Please try again.")
     } finally {
@@ -203,7 +216,7 @@ export default function CheckoutPage() {
                 <Input
                   id="phone"
                   type="tel"
-                  placeholder="+1 555 000 0000"
+                  placeholder="+27 82 000 0000"
                   autoComplete="tel"
                   {...register("contact.phone")}
                 />
@@ -309,10 +322,10 @@ export default function CheckoutPage() {
             </CardContent>
           </Card>
 
-<Card>
+          <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-lg">
-                <Truck className="text-primary size-5" aria-hidden="true" />
+                <CreditCard className="text-primary size-5" aria-hidden="true" />
                 Payment method
               </CardTitle>
               <CardDescription>Choose how you would like to pay.</CardDescription>
@@ -328,35 +341,47 @@ export default function CheckoutPage() {
                     aria-label="Payment method"
                   >
                     <Label
-                      htmlFor="pay-on-delivery"
+                      htmlFor="cash-on-delivery"
                       className="border-input hover:bg-muted/50 flex cursor-pointer items-start gap-3 rounded-2xl border p-4"
                     >
-                      <RadioGroupItem id="pay-on-delivery" value="pay_on_delivery" />
+                      <RadioGroupItem id="cash-on-delivery" value="cash_on_delivery" />
                       <span className="grid gap-0.5">
                         <span className="flex items-center gap-2 font-medium">
-                          <Wallet className="size-4" aria-hidden="true" />
-                          Pay on delivery
+                          <Banknote className="size-4" aria-hidden="true" />
+                          Cash on Delivery
                         </span>
                         <span className="text-muted-foreground text-sm">
-                          Pay cash or mobile money when your gas arrives.
+                          Pay cash when your gas is delivered to your door.
                         </span>
                       </span>
                     </Label>
                     <Label
-                      htmlFor="pay-online"
-                      className="border-input opacity-60 flex cursor-not-allowed items-start gap-3 rounded-2xl border p-4"
+                      htmlFor="payfast"
+                      className="border-input hover:bg-muted/50 flex cursor-pointer items-start gap-3 rounded-2xl border p-4"
                     >
-                      <RadioGroupItem id="pay-online" value="pay_online" disabled />
+                      <RadioGroupItem id="payfast" value="payfast" />
                       <span className="grid gap-0.5">
                         <span className="flex items-center gap-2 font-medium">
                           <CreditCard className="size-4" aria-hidden="true" />
-                          Pay online
-                          <span className="bg-muted text-muted-foreground rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase">
-                            Coming soon
-                          </span>
+                          PayFast — Card & Instant EFT
                         </span>
                         <span className="text-muted-foreground text-sm">
-                          Card and mobile money payments will be available soon.
+                          Visa, Mastercard, or instant bank transfer. Secure & immediate.
+                        </span>
+                      </span>
+                    </Label>
+                    <Label
+                      htmlFor="ozow"
+                      className="border-input hover:bg-muted/50 flex cursor-pointer items-start gap-3 rounded-2xl border p-4"
+                    >
+                      <RadioGroupItem id="ozow" value="ozow" />
+                      <span className="grid gap-0.5">
+                        <span className="flex items-center gap-2 font-medium">
+                          <Wallet className="size-4" aria-hidden="true" />
+                          Ozow — Instant EFT
+                        </span>
+                        <span className="text-muted-foreground text-sm">
+                          Direct bank transfer. No card needed, approved in seconds.
                         </span>
                       </span>
                     </Label>
@@ -394,9 +419,19 @@ export default function CheckoutPage() {
               <div className="flex items-center justify-between text-sm">
                 <span className="text-muted-foreground">Delivery fee</span>
                 <span className="font-medium tabular-nums">
-                  {selectedZone ? formatCurrency(deliveryFee, currency ?? "USD") : "Select a zone"}
+                  {selectedZone ? formatCurrency(deliveryFee, currency ?? "ZAR") : "Select a zone"}
                 </span>
               </div>
+              {discount > 0 && (
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-emerald-600 flex items-center gap-1">
+                    <Tag className="size-3" /> Promo discount
+                  </span>
+                  <span className="text-emerald-600 font-medium tabular-nums">
+                    -{formatCurrency(discount, currency ?? "ZAR")}
+                  </span>
+                </div>
+              )}
               {selectedZone?.estimatedMinutes ? (
                 <p className="text-muted-foreground text-xs">
                   Estimated delivery: approx. {formatMinutes(selectedZone.estimatedMinutes)}
@@ -406,8 +441,43 @@ export default function CheckoutPage() {
               <div className="flex items-center justify-between">
                 <span className="font-semibold">Total</span>
                 <span className="text-lg font-semibold tabular-nums">
-                  {formatCurrency(total, currency ?? "USD")}
+                  {formatCurrency(total, currency ?? "ZAR")}
                 </span>
+              </div>
+              {/* Promo code */}
+              <div className="flex flex-col gap-2">
+                <div className="flex gap-2">
+                  <Input
+                    placeholder="Promo code"
+                    value={promoCode}
+                    onChange={(e) => { setPromoCode(e.target.value); setPromoError(null); setPromoMessage(null); }}
+                    className="flex-1"
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    disabled={applyingPromo || !promoCode.trim()}
+                    onClick={async () => {
+                      setApplyingPromo(true);
+                      setPromoError(null);
+                      setPromoMessage(null);
+                      const result = await validatePromoCode(promoCode.trim(), subtotal + deliveryFee);
+                      if (result.valid) {
+                        setPromoDiscount(result.discount);
+                        setPromoMessage(result.message);
+                      } else {
+                        setPromoDiscount(0);
+                        setPromoError(result.message);
+                      }
+                      setApplyingPromo(false);
+                    }}
+                  >
+                    {applyingPromo ? <Loader2 className="size-3.5 animate-spin" /> : "Apply"}
+                  </Button>
+                </div>
+                {promoMessage && <p className="text-emerald-600 text-xs">{promoMessage}</p>}
+                {promoError && <p className="text-destructive text-xs">{promoError}</p>}
               </div>
               <p className="text-muted-foreground text-xs">
                 Prices are recalculated and confirmed by our system when you place the order.

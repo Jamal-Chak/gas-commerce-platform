@@ -678,3 +678,73 @@ STOP after the database foundation.
 DO NOT proceed to APIs or frontend.
 
 We will inspect the SQL migration before deploying it.
+
+
+Sign in failed
+
+Authentication is not configured yet. Ask an administrator to set the Supabase environment variables.
+
+
+Sign in failed
+
+Authentication is not configured yet. Ask an administrator to set the Supabase environment variables.
+
+project url : https://azxmjjvqspgkgahsxptt.supabase.co/rest/v1/
+
+anon public key :   eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF6eG1qanZxc3Bna2dhaHN4cHR0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY4ODgzNDMsImV4cCI6MjEwMjQ2NDM0M30.njJ5sXAt1pEzxe9qJGXKviNNy3JtTnFm0Ruc5k4XO2U
+
+ service_role key :   eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF6eG1qanZxc3Bna2dhaHN4cHR0Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4Njg4ODM0MywiZXhwIjoyMTAyNDY0MzQzfQ.K6yp29xoWsm0cf934749k1Z9OjvIJZij3GWO7F260Dk
+
+ Sign in failed
+
+Authentication is not configured yet. Ask an administrator to set the Supabase environment variables.
+
+Hydration failed because the server rendered text didn't match the client. As a result this tree will be regenerated on the client. This can happen if a SSR-ed Client Component used:
+- A server/client branch `if (typeof window !== 'undefined')`.
+- Variable input such as `Date.now()` or `Math.random()` which changes each time it's called.
+- Date formatting in a user's locale which doesn't match the server.
+- External changing data without sending a snapshot of it along with the HTML.
+- Invalid HTML tag nesting.
+
+It can also happen if the client has a browser extension installed which messes with the HTML before React loaded.
+
+See more info here: https://nextjs.org/docs/messages/react-hydration-error
+
+
+You're importing a module that depends on "next/headers". This API is only available in Server Components in the App Router, but you are using it in the Pages Router.
+./lib/supabase/serverClient.ts (2:1)
+
+Error: You're importing a module that depends on "next/headers". This API is only available in Server Components in the App Router, but you are using it in the Pages Router.
+    Learn more: https://nextjs.org/docs/app/building-your-application/rendering/server-components
+  1 | import { createServerClient } from '@supabase/ssr';
+> 2 | import { cookies } from 'next/headers';
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  3 | import { readEnv } from '@/lib/config/env';
+  4 |
+  5 | /**
+
+Ecmascript file had an error
+
+Import traces:
+  Server Component:
+    ./lib/supabase/serverClient.ts
+    ./lib/data/load-shedding.ts
+
+  Client Component Browser:
+    ./lib/supabase/serverClient.ts [Client Component Browser]
+    ./lib/data/customer.ts [Client Component Browser]
+    ./app/account/orders/page.tsx [Client Component Browser]
+    ./app/account/orders/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./lib/supabase/serverClient.ts [Client Component SSR]
+    ./lib/data/customer.ts [Client Component SSR]
+    ./app/account/orders/page.tsx [Client Component SSR]
+    ./app/account/orders/page.tsx [Server Component]
+
+
+
+    You are importing next/headers inside ./lib/supabase/serverClient.ts, which is being bundled into client components or shared code.Because next/headers requires the App Router server environment, you must pass request cookies explicitly or separate your client and server Supabase helper files.Fixing the Supabase ClientSplit your Supabase utility into separate files or accept a cookie object argument instead of calling cookies() globally at the top level of a shared utility file.Remove import { cookies } from 'next/headers' from files that can be imported by client-side components.Steps to ResolveUpdate ./lib/supabase/serverClient.ts to take cookies as an argument (for Pages/Client usage) or ensure it is strictly isolated to App Router server components/actions.Use @supabase/ssr with explicit cookie getters and setters tied to req and res if used across boundaries, or create a distinct browser client file using createBrowserClient.Check import paths in ./lib/data/customer.ts and ./lib/data/load-shedding.ts to ensure server-only code is not leaking into client bundles.If you can share the code inside ./lib/supabase/serverClient.ts, I can show you the exact code changes needed to fix this import error.        
+
+
+    https://github.com/Jamal-Chak/gas-commerce-platform.git

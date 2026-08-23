@@ -1,4 +1,4 @@
-import { CylinderSize, ServiceType } from '../domain/types';
+import { ServiceType } from '../domain/types';
 
 /**
  * Formats a monetary amount using the business currency. Used only for

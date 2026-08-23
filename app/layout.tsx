@@ -6,6 +6,11 @@ import { AppProviders } from "@/components/providers/app-providers";
 import { SiteHeader } from "@/components/layout/site-header";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { CartDrawer } from "@/components/cart/cart-drawer";
+import { LoadSheddingBanner } from "@/components/home/load-shedding-banner";
+import { ServiceWorkerRegistration } from "@/components/providers/service-worker-registration";
+import { CookieConsent } from "@/components/ui/cookie-consent";
+import { SkipToContent } from "@/components/ui/skip-to-content";
+import { WebVitals } from "@/components/providers/web-vitals";
 import { getBusinessConfig, SITE_URL } from "@/lib/config/business";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
@@ -47,6 +52,10 @@ export const metadata: Metadata = {
     siteName: companyName,
   },
   robots: { index: true, follow: true },
+  manifest: "/manifest.json",
+  other: {
+    "theme-color": "#f97316",
+  },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
@@ -57,10 +66,15 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     >
       <body className="min-h-full flex flex-col">
         <AppProviders>
+          <SkipToContent />
+          <ServiceWorkerRegistration />
+          <WebVitals />
           <SiteHeader />
-          <main className="flex-1">{children}</main>
+          <LoadSheddingBanner />
+          <main id="main-content" className="flex-1">{children}</main>
           <SiteFooter />
           <CartDrawer />
+          <CookieConsent />
         </AppProviders>
       </body>
     </html>

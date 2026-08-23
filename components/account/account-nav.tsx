@@ -3,14 +3,18 @@
 import { useState } from "react"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
-import { LayoutGrid, LogOut, MapPin, ReceiptText } from "lucide-react"
+import { LayoutGrid, LogOut, MapPin, ReceiptText, RefreshCw, Star, Bell, Users } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { signOutUser } from "@/lib/auth/auth-service"
 
 const links = [
-  { href: "/account", label: "Profile", icon: LayoutGrid },
+  { href: "/account/profile", label: "Profile", icon: LayoutGrid },
   { href: "/account/orders", label: "Orders", icon: ReceiptText },
   { href: "/account/addresses", label: "Addresses", icon: MapPin },
+  { href: "/account/subscriptions", label: "Auto-refill", icon: RefreshCw },
+  { href: "/account/loyalty", label: "Loyalty", icon: Star },
+  { href: "/account/notifications", label: "Notifications", icon: Bell },
+  { href: "/account/referrals", label: "Refer & Earn", icon: Users },
 ]
 
 export function AccountNav() {

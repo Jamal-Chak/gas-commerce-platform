@@ -20,11 +20,11 @@ INSERT INTO business_settings (
     'Clean Energy, Delivered Fast',
     '#f97316', -- Orange-500
     '#1e293b', -- Slate-800
-    '+15550199',
+    '+27115550199',
     'support@embergas-demo.com',
-    '123 Energy Way, Fuel City',
-    'USD',
-    '+15550199'
+    '123 Main Street, Johannesburg',
+    'ZAR',
+    '+27115550199'
 ) ON CONFLICT (id) DO UPDATE SET
     company_name = EXCLUDED.company_name,
     logo_url = EXCLUDED.logo_url,
@@ -46,9 +46,9 @@ INSERT INTO delivery_zones (
     estimated_minutes,
     active
 ) VALUES 
-('a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'Zone A - Downtown', 'Central business district and surrounding areas', 5.00, 30, TRUE),
-('a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a22', 'Zone B - Suburbs', 'Residential suburban communities', 10.00, 45, TRUE),
-('a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a33', 'Zone C - Outer Rim', 'Far outreach and rural areas', 20.00, 75, TRUE)
+('a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'Zone A - Central', 'Central business district and surrounding areas', 50.00, 30, TRUE),
+('a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a22', 'Zone B - Suburbs', 'Residential suburban communities', 100.00, 45, TRUE),
+('a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a33', 'Zone C - Outlying', 'Far outreach and rural areas', 200.00, 75, TRUE)
 ON CONFLICT (id) DO UPDATE SET
     name = EXCLUDED.name,
     description = EXCLUDED.description,
@@ -72,29 +72,29 @@ INSERT INTO products (
     featured
 ) VALUES
 -- 6KG
-('6bc9bd38-0a11-4ef8-bb6d-a0eebc995f01', '6kg Gas Refill (Demo)', '6kg-gas-refill-demo', 'Pure LPG gas refill for your 6kg cylinder.', 'REFILL', 6.00, 15.00, NULL, 'https://example.com/6kg-refill.png', TRUE, FALSE),
-('6bc9bd38-0a11-4ef8-bb6d-a0eebc995f02', '6kg Cylinder Exchange (Demo)', '6kg-cylinder-exchange-demo', 'Bring your empty 6kg cylinder and exchange for a full one.', 'EXCHANGE', 6.00, 18.00, NULL, 'https://example.com/6kg-exchange.png', TRUE, TRUE),
-('6bc9bd38-0a11-4ef8-bb6d-a0eebc995f03', 'New 6kg Cylinder (Demo)', 'new-6kg-cylinder-demo', 'Brand new 6kg cylinder complete with LPG gas.', 'NEW_CYLINDER', 6.00, 45.00, 40.00, 'https://example.com/new-6kg.png', TRUE, FALSE),
+('6bc9bd38-0a11-4ef8-bb6d-a0eebc995f01', '6kg Gas Refill', '6kg-gas-refill-demo', 'Pure LPG gas refill for your 6kg cylinder.', 'REFILL', 6.00, 280.00, NULL, '/images/cylinder-6kg.svg', TRUE, FALSE),
+('6bc9bd38-0a11-4ef8-bb6d-a0eebc995f02', '6kg Cylinder Exchange', '6kg-cylinder-exchange-demo', 'Bring your empty 6kg cylinder and exchange for a full one.', 'EXCHANGE', 6.00, 350.00, NULL, '/images/cylinder-6kg.svg', TRUE, TRUE),
+('6bc9bd38-0a11-4ef8-bb6d-a0eebc995f03', 'New 6kg Cylinder', 'new-6kg-cylinder-demo', 'Brand new 6kg cylinder complete with LPG gas.', 'NEW_CYLINDER', 6.00, 850.00, 799.00, '/images/cylinder-6kg.svg', TRUE, FALSE),
 
 -- 9KG
-('9bc9bd38-0a11-4ef8-bb6d-a0eebc995f01', '9kg Gas Refill (Demo)', '9kg-gas-refill-demo', 'Pure LPG gas refill for your 9kg cylinder.', 'REFILL', 9.00, 22.00, NULL, 'https://example.com/9kg-refill.png', TRUE, FALSE),
-('9bc9bd38-0a11-4ef8-bb6d-a0eebc995f02', '9kg Cylinder Exchange (Demo)', '9kg-cylinder-exchange-demo', 'Bring your empty 9kg cylinder and exchange for a full one.', 'EXCHANGE', 9.00, 25.00, NULL, 'https://example.com/9kg-exchange.png', TRUE, TRUE),
-('9bc9bd38-0a11-4ef8-bb6d-a0eebc995f03', 'New 9kg Cylinder (Demo)', 'new-9kg-cylinder-demo', 'Brand new 9kg cylinder complete with LPG gas.', 'NEW_CYLINDER', 9.00, 55.00, NULL, 'https://example.com/new-9kg.png', TRUE, FALSE),
+('9bc9bd38-0a11-4ef8-bb6d-a0eebc995f01', '9kg Gas Refill', '9kg-gas-refill-demo', 'Pure LPG gas refill for your 9kg cylinder.', 'REFILL', 9.00, 380.00, NULL, '/images/cylinder-9kg.svg', TRUE, FALSE),
+('9bc9bd38-0a11-4ef8-bb6d-a0eebc995f02', '9kg Cylinder Exchange', '9kg-cylinder-exchange-demo', 'Bring your empty 9kg cylinder and exchange for a full one.', 'EXCHANGE', 9.00, 450.00, NULL, '/images/cylinder-9kg.svg', TRUE, TRUE),
+('9bc9bd38-0a11-4ef8-bb6d-a0eebc995f03', 'New 9kg Cylinder', 'new-9kg-cylinder-demo', 'Brand new 9kg cylinder complete with LPG gas.', 'NEW_CYLINDER', 9.00, 1100.00, NULL, '/images/cylinder-9kg.svg', TRUE, FALSE),
 
 -- 14KG
-('14c9bd38-0a11-4ef8-bb6d-a0eebc995f01', '14kg Gas Refill (Demo)', '14kg-gas-refill-demo', 'Pure LPG gas refill for your 14kg cylinder.', 'REFILL', 14.00, 32.00, NULL, 'https://example.com/14kg-refill.png', TRUE, FALSE),
-('14c9bd38-0a11-4ef8-bb6d-a0eebc995f02', '14kg Cylinder Exchange (Demo)', '14kg-cylinder-exchange-demo', 'Bring your empty 14kg cylinder and exchange for a full one.', 'EXCHANGE', 14.00, 35.00, NULL, 'https://example.com/14kg-exchange.png', TRUE, TRUE),
-('14c9bd38-0a11-4ef8-bb6d-a0eebc995f03', 'New 14kg Cylinder (Demo)', 'new-14kg-cylinder-demo', 'Brand new 14kg cylinder complete with LPG gas.', 'NEW_CYLINDER', 14.00, 75.00, NULL, 'https://example.com/new-14kg.png', TRUE, FALSE),
+('14c9bd38-0a11-4ef8-bb6d-a0eebc995f01', '14kg Gas Refill', '14kg-gas-refill-demo', 'Pure LPG gas refill for your 14kg cylinder.', 'REFILL', 14.00, 520.00, NULL, '/images/cylinder-14kg.svg', TRUE, FALSE),
+('14c9bd38-0a11-4ef8-bb6d-a0eebc995f02', '14kg Cylinder Exchange', '14kg-cylinder-exchange-demo', 'Bring your empty 14kg cylinder and exchange for a full one.', 'EXCHANGE', 14.00, 620.00, NULL, '/images/cylinder-14kg.svg', TRUE, TRUE),
+('14c9bd38-0a11-4ef8-bb6d-a0eebc995f03', 'New 14kg Cylinder', 'new-14kg-cylinder-demo', 'Brand new 14kg cylinder complete with LPG gas.', 'NEW_CYLINDER', 14.00, 1600.00, NULL, '/images/cylinder-14kg.svg', TRUE, FALSE),
 
 -- 19KG
-('19c9bd38-0a11-4ef8-bb6d-a0eebc995f01', '19kg Gas Refill (Demo)', '19kg-gas-refill-demo', 'Pure LPG gas refill for your 19kg cylinder.', 'REFILL', 19.00, 42.00, NULL, 'https://example.com/19kg-refill.png', TRUE, FALSE),
-('19c9bd38-0a11-4ef8-bb6d-a0eebc995f02', '19kg Cylinder Exchange (Demo)', '19kg-cylinder-exchange-demo', 'Bring your empty 19kg cylinder and exchange for a full one.', 'EXCHANGE', 19.00, 45.00, 42.50, 'https://example.com/19kg-exchange.png', TRUE, TRUE),
-('19c9bd38-0a11-4ef8-bb6d-a0eebc995f03', 'New 19kg Cylinder (Demo)', 'new-19kg-cylinder-demo', 'Brand new 19kg cylinder complete with LPG gas.', 'NEW_CYLINDER', 19.00, 95.00, NULL, 'https://example.com/new-19kg.png', TRUE, FALSE),
+('19c9bd38-0a11-4ef8-bb6d-a0eebc995f01', '19kg Gas Refill', '19kg-gas-refill-demo', 'Pure LPG gas refill for your 19kg cylinder.', 'REFILL', 19.00, 680.00, NULL, '/images/cylinder-19kg.svg', TRUE, FALSE),
+('19c9bd38-0a11-4ef8-bb6d-a0eebc995f02', '19kg Cylinder Exchange', '19kg-cylinder-exchange-demo', 'Bring your empty 19kg cylinder and exchange for a full one.', 'EXCHANGE', 19.00, 780.00, 749.00, '/images/cylinder-19kg.svg', TRUE, TRUE),
+('19c9bd38-0a11-4ef8-bb6d-a0eebc995f03', 'New 19kg Cylinder', 'new-19kg-cylinder-demo', 'Brand new 19kg cylinder complete with LPG gas.', 'NEW_CYLINDER', 19.00, 2100.00, NULL, '/images/cylinder-19kg.svg', TRUE, FALSE),
 
 -- 48KG
-('48c9bd38-0a11-4ef8-bb6d-a0eebc995f01', '48kg Gas Refill (Demo)', '48kg-gas-refill-demo', 'Pure LPG gas refill for your 48kg cylinder.', 'REFILL', 48.00, 95.00, NULL, 'https://example.com/48kg-refill.png', TRUE, FALSE),
-('48c9bd38-0a11-4ef8-bb6d-a0eebc995f02', '48kg Cylinder Exchange (Demo)', '48kg-cylinder-exchange-demo', 'Bring your empty 48kg cylinder and exchange for a full one.', 'EXCHANGE', 48.00, 100.00, NULL, 'https://example.com/48kg-exchange.png', TRUE, FALSE),
-('48c9bd38-0a11-4ef8-bb6d-a0eebc995f03', 'New 48kg Cylinder (Demo)', 'new-48kg-cylinder-demo', 'Brand new 48kg cylinder complete with LPG gas.', 'NEW_CYLINDER', 48.00, 180.00, NULL, 'https://example.com/new-48kg.png', TRUE, FALSE)
+('48c9bd38-0a11-4ef8-bb6d-a0eebc995f01', '48kg Gas Refill', '48kg-gas-refill-demo', 'Pure LPG gas refill for your 48kg cylinder.', 'REFILL', 48.00, 1500.00, NULL, '/images/cylinder-48kg.svg', TRUE, FALSE),
+('48c9bd38-0a11-4ef8-bb6d-a0eebc995f02', '48kg Cylinder Exchange', '48kg-cylinder-exchange-demo', 'Bring your empty 48kg cylinder and exchange for a full one.', 'EXCHANGE', 48.00, 1700.00, NULL, '/images/cylinder-48kg.svg', TRUE, FALSE),
+('48c9bd38-0a11-4ef8-bb6d-a0eebc995f03', 'New 48kg Cylinder', 'new-48kg-cylinder-demo', 'Brand new 48kg cylinder complete with LPG gas.', 'NEW_CYLINDER', 48.00, 4200.00, NULL, '/images/cylinder-48kg.svg', TRUE, FALSE)
 ON CONFLICT (id) DO UPDATE SET
     name = EXCLUDED.name,
     slug = EXCLUDED.slug,
